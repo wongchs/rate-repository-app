@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet } from "react-native";
 import theme from "../theme";
 import { format } from "date-fns";
+import ReviewActions from "./ReviewActions";
 
 const styles = StyleSheet.create({
   container: {
@@ -39,21 +40,24 @@ const styles = StyleSheet.create({
   },
 });
 
-const ReviewItem = ({ review, showRepository }) => {
+const ReviewItem = ({ review, showRepository, showActions, refetch }) => {
   const formattedDate = format(new Date(review.createdAt), "dd.MM.yyyy");
 
   return (
-    <View style={styles.container}>
-      <View style={styles.ratingContainer}>
-        <Text style={styles.ratingText}>{review.rating}</Text>
+    <View>
+      <View style={styles.container}>
+        <View style={styles.ratingContainer}>
+          <Text style={styles.ratingText}>{review.rating}</Text>
+        </View>
+        <View style={styles.contentContainer}>
+          <Text style={styles.headerText}>
+            {showRepository ? review.repository.fullName : review.user.username}
+          </Text>
+          <Text style={styles.dateText}>{formattedDate}</Text>
+          <Text style={styles.reviewText}>{review.text}</Text>
+        </View>
       </View>
-      <View style={styles.contentContainer}>
-        <Text style={styles.headerText}>
-          {showRepository ? review.repository.fullName : review.user.username}
-        </Text>
-        <Text style={styles.dateText}>{formattedDate}</Text>
-        <Text style={styles.reviewText}>{review.text}</Text>
-      </View>
+      {showActions && <ReviewActions review={review} refetch={refetch} />}
     </View>
   );
 };
