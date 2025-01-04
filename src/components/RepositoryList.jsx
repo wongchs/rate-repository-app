@@ -4,6 +4,8 @@ import useRepositories from "../hooks/useRepositories";
 import { useNavigate } from "react-router-native";
 import { useState } from "react";
 import { Picker } from "@react-native-picker/picker";
+import { useDebounce } from "use-debounce";
+import { RepositoryListContainer } from "./RepositoryListContainer";
 
 const styles = StyleSheet.create({
   separator: {
@@ -16,6 +18,8 @@ const ItemSeparator = () => <View style={styles.separator} />;
 const RepositoryList = () => {
   const navigate = useNavigate();
   const [selectedOrder, setSelectedOrder] = useState("latest");
+  const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText] = useDebounce(searchText, 500);
 
   const getOrderVariables = (order) => {
     switch (order) {
@@ -29,7 +33,11 @@ const RepositoryList = () => {
   };
 
   const { orderBy, orderDirection } = getOrderVariables(selectedOrder);
-  const { repositories } = useRepositories({ orderBy, orderDirection });
+  const { repositories } = useRepositories({
+    orderBy,
+    orderDirection,
+    searchKeyword: debouncedSearchText,
+  });
 
   const repositoryNodes = repositories
     ? repositories.edges.map((edge) => edge.node)
@@ -40,24 +48,13 @@ const RepositoryList = () => {
   };
 
   return (
-    <FlatList
-      ListHeaderComponent={
-        <Picker
-          selectedValue={selectedOrder}
-          onValueChange={(value) => setSelectedOrder(value)}
-        >
-          <Picker.Item label="Latest repositories" value="latest" />
-          <Picker.Item label="Highest rated repositories" value="highest" />
-          <Picker.Item label="Lowest rated repositories" value="lowest" />
-        </Picker>
-      }
-      data={repositoryNodes}
-      ItemSeparatorComponent={ItemSeparator}
-      renderItem={({ item }) => (
-        <Pressable onPress={() => onRepositoryPress(item.id)}>
-          <RepositoryItem item={item} />
-        </Pressable>
-      )}
+    <RepositoryListContainer
+      selectedOrder={selectedOrder}
+      setSelectedOrder={setSelectedOrder}
+      searchText={searchText}
+      setSearchText={setSearchText}
+      repositoryNodes={repositoryNodes}
+      onPressRepository={onRepositoryPress}
     />
   );
 };
