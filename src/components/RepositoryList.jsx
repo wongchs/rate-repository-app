@@ -33,11 +33,16 @@ const RepositoryList = () => {
   };
 
   const { orderBy, orderDirection } = getOrderVariables(selectedOrder);
-  const { repositories } = useRepositories({
+  const { repositories, fetchMore } = useRepositories({
     orderBy,
     orderDirection,
     searchKeyword: debouncedSearchText,
+    first: 8,
   });
+
+  const onEndReach = () => {
+    fetchMore();
+  };
 
   const repositoryNodes = repositories
     ? repositories.edges.map((edge) => edge.node)
@@ -55,6 +60,7 @@ const RepositoryList = () => {
       setSearchText={setSearchText}
       repositoryNodes={repositoryNodes}
       onPressRepository={onRepositoryPress}
+      onEndReach={onEndReach}
     />
   );
 };
