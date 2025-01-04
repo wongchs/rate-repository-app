@@ -1,9 +1,10 @@
-import { View, Pressable, StyleSheet } from "react-native";
+import { View, FlatList, StyleSheet } from "react-native";
 import { useParams } from "react-router-native";
-import * as Linking from 'expo-linking';
+import * as Linking from "expo-linking";
 import { Text } from "react-native";
 
-import RepositoryItem from "./RepositoryItem";
+import RepositoryInfo from "./RepositoryInfo";
+import ReviewItem from "./ReviewItem";
 import useRepository from "../hooks/useRepository";
 import theme from "../theme";
 
@@ -22,7 +23,12 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: theme.fontWeights.bold,
   },
+  separator: {
+    height: 10,
+  },
 });
+
+const ItemSeparator = () => <View style={styles.separator} />;
 
 const RepositoryView = () => {
   const { id } = useParams();
@@ -32,17 +38,16 @@ const RepositoryView = () => {
     return null;
   }
 
-  const openGitHub = () => {
-    Linking.openURL(repository.url);
-  };
+  const reviews = repository.reviews.edges.map((edge) => edge.node);
 
   return (
-    <View style={styles.container}>
-      <RepositoryItem item={repository} />
-      <Pressable style={styles.button} onPress={openGitHub}>
-        <Text style={styles.buttonText}>Open in GitHub</Text>
-      </Pressable>
-    </View>
+    <FlatList
+      data={reviews}
+      renderItem={({ item }) => <ReviewItem review={item} />}
+      keyExtractor={({ id }) => id}
+      ListHeaderComponent={() => <RepositoryInfo repository={repository} />}
+      ItemSeparatorComponent={ItemSeparator}
+    />
   );
 };
 
